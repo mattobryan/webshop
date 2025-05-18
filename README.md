@@ -1,6 +1,3 @@
-Thanks for the details! I’ll create a comprehensive `README.md` for your MEAN stack mobile webshop project. It will cover project overview, features, technology stack, setup instructions, and usage roles (admin, customer, guest). I’ll let you know once it’s ready.
-
-
 # Mobile Webshop – MEAN Stack Project
 
 ## Project Overview
