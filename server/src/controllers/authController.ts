@@ -5,7 +5,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 
 // Register a new user
 export const register = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;  // Add username here
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -13,7 +13,7 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    user = new User({ email, password });
+    user = new User({ username, email, password });  // Add username to user creation
     await user.save();
 
     const accessToken = generateAccessToken({ id: user._id, role: user.role });
@@ -24,19 +24,27 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-// Login user and return JWTs
+// Login user and return JWTs (with safe user serialization)
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { login, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const query = login.includes('@') ? { email: login } : { username: login };
+    const user = await User.findOne(query);
+
     if (!user || !(await user.comparePassword(password))) {
-      res.status(400).json({ message: 'Invalid email or password' });
+      res.status(400).json({ message: 'Invalid login or password' });
       return;
     }
 
+    // Generate tokens
     const accessToken = generateAccessToken({ id: user._id, role: user.role });
     const refreshToken = generateRefreshToken({ id: user._id, role: user.role });
-    res.status(200).json({ accessToken, refreshToken });
+
+   // Use destructuring to exclude password
+    const { password: _, ...userWithoutPassword } = user.toObject();
+
+    // Send response with tokens and safe user object
+    res.status(200).json({ accessToken, refreshToken, user: userWithoutPassword });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }

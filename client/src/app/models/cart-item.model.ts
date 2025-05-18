@@ -2,7 +2,7 @@
 import { Product } from './product.model';
 
 export interface CartItem {
-  id: number;
-  product: Product;
+  id: string;               // id of the cart item (for update/delete)
   quantity: number;
+  product: Product;      // product details
 }

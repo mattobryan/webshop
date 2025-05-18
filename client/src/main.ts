@@ -8,7 +8,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { AuthInterceptor } from './app/interceptors/auth.interceptors';
+import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 
 if (environment.production) {
   enableProdMode();

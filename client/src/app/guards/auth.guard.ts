@@ -1,15 +1,23 @@
-// src/app/guards/auth.guard.ts
-import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { CanActivate } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, @Inject(PLATFORM_ID) private platformId: Object) {}
+
   canActivate(): boolean {
-    if (sessionStorage.getItem('accessToken')) {
-      return true;
+    if (isPlatformBrowser(this.platformId)) {
+      if (sessionStorage.getItem('accessToken')) {
+        return true;
+      } else {
+        this.router.navigate(['/login']);
+        return false;
+      }
     } else {
-      this.router.navigate(['/login']);
+      // If not browser (SSR), block navigation or allow — your choice
+      // Usually false to prevent server navigation
       return false;
     }
   }

@@ -12,33 +12,52 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [ReactiveFormsModule, RouterModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   template: `
-    <form [formGroup]="loginForm" class="login-form" (ngSubmit)="onSubmit()">
-      <mat-form-field appearance="fill"><mat-label>Username</mat-label>
-        <input matInput formControlName="username">
-      </mat-form-field>
-      <mat-form-field appearance="fill"><mat-label>Password</mat-label>
-        <input matInput type="password" formControlName="password">
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">Login</button>
-    </form>
+    <div class="login-container">
+      <h2>Login</h2>
+      <form [formGroup]="loginForm" class="login-form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill"><mat-label>Username oremail</mat-label>
+          <input matInput formControlName="login">
+        </mat-form-field>
+        <mat-form-field appearance="fill"><mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password">
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">Login</button>
+      </form>
+      <div class="register-link">
+        <p>Not registered yet? <a routerLink="/register">Register here</a></p>
+      </div>
+    </div>
   `,
-  styles: [`.login-form { max-width: 300px; margin: 40px auto; display: flex; flex-direction: column; gap: 16px; }`]
+  styles: [`
+    .login-container { max-width: 300px; margin: 40px auto; }
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+    .register-link { margin-top: 20px; text-align: center; }
+    .register-link a { color: #3f51b5; text-decoration: none; }
+    .register-link a:hover { text-decoration: underline; }
+  `]
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   constructor(private auth: AuthService, private router: Router) {}
   ngOnInit() {
     this.loginForm = new FormGroup({
-      username: new FormControl('', Validators.required),
+      login:new FormControl('', Validators.required),
       password: new FormControl('', Validators.required)
     });
   }
   onSubmit() {
-    if (this.loginForm.valid) {
-      this.auth.login(this.loginForm.value).subscribe({
-        next: () => this.router.navigate(['/products']),
-        error: () => alert('Login failed')
-      });
-    }
+  if (this.loginForm.valid) {
+    this.auth.login(this.loginForm.value).subscribe({
+      next: (res) => {
+        console.log('Login response:', res);  // <-- Add this line
+        if (res.user && res.user.role === 'admin') {
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          this.router.navigate(['/products']);
+        }
+      },
+      error: () => alert('Login failed')
+    });
   }
+}
 }

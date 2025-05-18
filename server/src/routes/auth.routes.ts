@@ -24,10 +24,20 @@ router.post(
 );
 
 // Login route
+// Login route
 router.post(
   '/login',
-  body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
+  body('login').notEmpty(),  // must not be empty
+  body('login').custom(value => {
+    if (value.includes('@')) {
+      // Validate email format only if it looks like an email
+      if (!/\S+@\S+\.\S+/.test(value)) {
+        throw new Error('Invalid email format');
+      }
+    }
+    return true;
+  }),
+  body('password').isLength({ min: 6 }),  // password length check
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

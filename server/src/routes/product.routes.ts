@@ -3,7 +3,7 @@ import express from 'express';
 import multer from 'multer';
 import { authMiddleware } from '../middlewares/auth';
 import { requireRole } from '../middlewares/role';
-import { asyncHandler } from './utils/asyncHandler';
+import { asyncHandler } from '../utils/asyncHandler';
 
 import {
   createProduct,

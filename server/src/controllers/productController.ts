@@ -10,7 +10,11 @@ export const createProduct = async (req: Request, res: Response) => {
     const { name, description, price } = req.body;
     const product = new Product({ name, description, price, imageUrl });
     await product.save();
-    res.status(201).json(product);
+    
+    // Transform _id to id for client compatibility
+    const productObj = product.toObject();
+    productObj.id = productObj._id;
+    res.status(201).json(productObj);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -20,7 +24,13 @@ export const createProduct = async (req: Request, res: Response) => {
 export const getProducts = async (req: Request, res: Response) => {
   try {
     const products = await Product.find();
-    res.json(products);
+    // Transform _id to id for client compatibility
+    const transformedProducts = products.map(product => {
+      const productObj = product.toObject();
+      productObj.id = productObj._id;
+      return productObj;
+    });
+    res.json(transformedProducts);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -29,12 +39,20 @@ export const getProducts = async (req: Request, res: Response) => {
 // Get a single product by ID (public)
 export const getProductById = async (req: Request, res: Response) => {
   try {
+    // Check if id is undefined or empty
+    if (!req.params.id || req.params.id === 'undefined') {
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+    
     const prod = await Product.findById(req.params.id);
     if (!prod) {
-      res.status(404).json({ message: 'Product not found' });
-      return;
+      return res.status(404).json({ message: 'Product not found' });
     }
-    res.json(prod);
+    
+    // Transform _id to id for client compatibility
+    const productObj = prod.toObject();
+    productObj.id = productObj._id;
+    res.json(productObj);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -43,10 +61,14 @@ export const getProductById = async (req: Request, res: Response) => {
 // Update a product (admin only)
 export const updateProduct = async (req: Request, res: Response) => {
   try {
+    // Check if id is undefined or empty
+    if (!req.params.id || req.params.id === 'undefined') {
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+    
     const prod = await Product.findById(req.params.id);
     if (!prod) {
-      res.status(404).json({ message: 'Product not found' });
-      return;
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     // Update fields if provided
@@ -57,7 +79,11 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (req.file) prod.imageUrl = `/uploads/${req.file.filename}`;
 
     await prod.save();
-    res.json(prod);
+    
+    // Transform _id to id for client compatibility
+    const productObj = prod.toObject();
+    productObj.id = productObj._id;
+    res.json(productObj);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -66,10 +92,14 @@ export const updateProduct = async (req: Request, res: Response) => {
 // Delete a product (admin only)
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
+    // Check if id is undefined or empty
+    if (!req.params.id || req.params.id === 'undefined') {
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+    
     const prod = await Product.findByIdAndDelete(req.params.id);
     if (!prod) {
-      res.status(404).json({ message: 'Product not found' });
-      return;
+      return res.status(404).json({ message: 'Product not found' });
     }
     res.json({ message: 'Product deleted' });
   } catch (err: any) {
